@@ -1,4 +1,4 @@
-import { axiosInstance } from './api/init';
+import { axiosInstance } from './api/main';
 import { browser } from '$app/environment';
 import { writable, type Writable } from 'svelte/store';
 
