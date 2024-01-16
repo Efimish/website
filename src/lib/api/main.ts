@@ -2,8 +2,8 @@ import axios, { AxiosHeaders } from 'axios';
 import { refresh } from './auth';
 
 export const axiosInstance = axios.create({
-    // baseURL: 'http://localhost:8080'
-    baseURL: 'http://efima.fun:8080'
+    baseURL: 'http://localhost:3000'
+    // baseURL: 'http://efima.fun:8080'
 });
 
 axiosInstance.interceptors.request.use(
@@ -28,7 +28,7 @@ axiosInstance.interceptors.response.use(
             error.response.status === 401 &&
             !originalConfig._retry &&
             refreshToken &&
-            !(originalConfig.url || '').endsWith('/auth/refreshToken')
+            !(originalConfig.url || '').endsWith('/auth/refresh')
         ) {
             originalConfig._retry = true;
             try {
