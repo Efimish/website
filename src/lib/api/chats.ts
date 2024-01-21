@@ -1,4 +1,5 @@
 import { axiosInstance } from './main';
+import type { BaseUser } from './users';
 
 type Chat = {
     chatId: string,
@@ -17,7 +18,7 @@ type Message = {
  * Gets all your chats\
  * or errors in case of server error
  */
-export const getMyChats = async () => {
+export const getChats = async () => {
     try {
         const { data } : { data: Chat[] } = await axiosInstance.get('/chats');
         return data;
@@ -43,12 +44,39 @@ export const createChat = async (chatName: string) => {
 }
 
 /**
+ * Gets one chat by id\
+ * or errors in case of server error
+ */
+export const getChat = async (chatId: string) => {
+    try {
+        const { data } : { data: Chat } = await axiosInstance.get(`/chats/${chatId}`);
+        return data;
+    } catch (err) {
+        console.error(err);
+        // handle error later
+    }
+}
+
+/**
+ * Deletes one chat by id\
+ * or errors in case of server error
+ */
+export const deleteChat = async (chatId: string) => {
+    try {
+        await axiosInstance.delete(`/chats/${chatId}`);
+    } catch (err) {
+        console.error(err);
+        // handle error later
+    }
+}
+
+/**
  * Gets all messages from one chat\
  * or errors in case of server error
  */
 export const getChatMessages = async (chatId: string) => {
     try {
-        const { data } : { data: Message[] } = await axiosInstance.get(`/messages/${chatId}`);
+        const { data } : { data: Message[] } = await axiosInstance.get(`/chats/${chatId}/messages`);
         return data;
     } catch (err) {
         console.error(err);
@@ -62,9 +90,37 @@ export const getChatMessages = async (chatId: string) => {
  */
 export const sendChatMessage = async (chatId: string, context: string) => {
     try {
-        await axiosInstance.post('/messages', {
-            chatId,
+        await axiosInstance.post(`/chats/${chatId}/messages`, {
             context
+        });
+    } catch (err) {
+        console.error(err);
+        // handle error later
+    }
+}
+
+/**
+ * Gets all users from one chat\
+ * or errors in case of server error
+ */
+export const getChatUsers = async (chatId: string) => {
+    try {
+        const { data } : { data: BaseUser[] } = await axiosInstance.get(`/chats/${chatId}/users`);
+        return data;
+    } catch (err) {
+        console.error(err);
+        // handle error later
+    }
+}
+
+/**
+ * Adds one more user to a chat\
+ * or errors in case of server error
+ */
+export const addChatUser = async (chatId: string, userId: string) => {
+    try {
+        await axiosInstance.post(`/chats/${chatId}/users`, {
+            userId
         });
     } catch (err) {
         console.error(err);

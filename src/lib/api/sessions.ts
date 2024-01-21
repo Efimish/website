@@ -30,7 +30,9 @@ export const getMySessions = async () => {
  */
 export const endOneSession = async (sessionId: string) => {
     try {
-        await axiosInstance.post(`/sessions/end/${sessionId}`);
+        await axiosInstance.post('/sessions/end', {
+            sessionId
+        });
     } catch (err) {
         console.error(err);
         // handle error later

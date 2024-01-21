@@ -2,8 +2,8 @@ import axios, { AxiosHeaders } from 'axios';
 import { refresh } from './auth';
 
 export const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3000'
-    // baseURL: 'http://efima.fun:8080'
+    // baseURL: 'http://localhost:3000'
+    baseURL: 'http://efima.fun:3000'
 });
 
 axiosInstance.interceptors.request.use(
@@ -19,7 +19,25 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        if (!response.data.length) {
+            for (const date of ['online', 'lastActive', 'createdAt']) {
+                if (response.data[date]) {
+                    response.data[date] = new Date(response.data[date]);
+                }
+            }
+        }
+        else {
+            for (const el of response.data) {
+                for (const date of ['online', 'lastActive', 'createdAt']) {
+                    if (el[date]) {
+                        el[date] = new Date(el[date]);
+                    }
+                }
+            }
+        }
+        return response;
+    },
     async (error) => {
         const originalConfig = error.config;
         const refreshToken = localStorage.getItem('refresh_token');

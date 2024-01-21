@@ -1,4 +1,5 @@
 import { axiosInstance } from './main';
+import { authenticated } from '$lib/stores';
 import { goto } from '$app/navigation';
 
 type TokenPair = {
@@ -18,6 +19,7 @@ export const login = async (username: string, password: string) => {
         });
         localStorage.setItem('access_token', data.access);
         localStorage.setItem('refresh_token', data.refresh);
+        authenticated.set(true);
         goto('/');
     } catch (err) {
         console.error(err);
@@ -38,6 +40,7 @@ export const register = async (tag: string, email: string, password: string) => 
         })
         localStorage.setItem('access_token', data.access);
         localStorage.setItem('refresh_token', data.refresh);
+        authenticated.set(true);
         goto('/');
     } catch (err) {
         console.error(err);
@@ -51,7 +54,7 @@ export const register = async (tag: string, email: string, password: string) => 
  */
 export const refresh = async (refreshToken: string) => {
     try {
-        const { data } : { data: TokenPair } = await axiosInstance.post('/auth/refreshToken', {
+        const { data } : { data: TokenPair } = await axiosInstance.post('/auth/refresh', {
             refreshToken
         });
         localStorage.setItem('access_token', data.access);
@@ -60,6 +63,7 @@ export const refresh = async (refreshToken: string) => {
         console.error(err);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        authenticated.set(false);
         goto('/login');
         // handle error later
     }
@@ -74,7 +78,8 @@ export const logout = async () => {
         await axiosInstance.post('/auth/logout');
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        goto('/');
+        authenticated.set(false);
+        goto('/login');
     } catch (err) {
         window.location.reload();
         console.error(err);

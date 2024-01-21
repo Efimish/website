@@ -1,8 +1,8 @@
 <script lang="ts">
     import { authenticated } from '$lib/stores';
     import { goto } from '$app/navigation';
-    if ($authenticated) goto('/');
+    if (!$authenticated) goto('/login');
 </script>
-{#if !$authenticated}
+{#if $authenticated}
     <slot />
 {/if}

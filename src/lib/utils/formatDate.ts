@@ -16,7 +16,8 @@ const leadingZero = (n: number) => {
     return `${n}`;
 }
 
-export const formatDate = (date: Date) => {
+export const formatDate = (date: Date | null) => {
+    if (date === null) return 'Never';
     const year = date.getFullYear();
     const month = months[date.getMonth()];
     const day = dayWithSuffix(date.getDate());

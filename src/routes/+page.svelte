@@ -7,7 +7,8 @@
 </div> -->
 
 <script lang="ts">
-    import { formatDate } from "$lib/utils/formatDate";
+    import { checkHealth } from '$lib/api/health';
+    import { formatDate } from '$lib/utils/formatDate';
     let time = new Date();
     setInterval(() => {
         time = new Date();
@@ -25,4 +26,12 @@
 </svelte:head>
 
 <p class="text-2xl">⌛ Right now it is ⌛</p>
-<p class="text-5xl">{formatDate(time)}</p>
+<p class="text-3xl">{formatDate(time)}</p>
+{#await checkHealth() then health}
+{#if health}
+<p class="text-2xl">🤔 Is out server fine? 🤔</p>
+<p class="text-2xl">{health.status ? "Yes" : "No"}</p>
+<p class="text-2xl">Database ping: {health.database.status ? health.database.ping + 'ms' : "Error"}</p>
+<p class="text-2xl">Third party api ping: {health.thirdParty.status ? health.thirdParty.ping + 'ms' : "Error"}</p>
+{/if}
+{/await}
