@@ -1,5 +1,31 @@
 import axios, { AxiosHeaders } from 'axios';
-import { refresh } from './auth';
+import { authenticated } from '$lib/stores';
+import { goto } from '$app/navigation';
+import type { TokenPair } from './auth';
+
+let refreshing: Promise<void> | undefined = undefined;
+
+/**
+ * Refreshes user session
+ */
+const refresh = async (refreshToken: string) => {
+    try {
+        const { data } : { data: TokenPair } = await axiosInstance.post('/auth/refresh', {
+            refreshToken
+        });
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+    } catch (err) {
+        console.error(err);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        authenticated.set(false);
+        goto('/login');
+        // handle error later
+    } finally {
+        refreshing = undefined;
+    }
+}
 
 export const axiosInstance = axios.create({
     // baseURL: 'http://localhost:3000'
@@ -18,24 +44,20 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+const fixObjectDates = (obj: any) => {
+    const iterable = (maybeArr: any) => maybeArr.length ? maybeArr : [maybeArr];
+    for(const el of iterable(obj)) {
+        for(const [key, value] of Object.entries(el)) {
+            if (typeof value !== 'string') continue;
+            const date = Date.parse(value);
+            if (date) el[key] = date;
+        }
+    }
+}
+
 axiosInstance.interceptors.response.use(
     (response) => {
-        if (!response.data.length) {
-            for (const date of ['online', 'lastActive', 'createdAt']) {
-                if (response.data[date]) {
-                    response.data[date] = new Date(response.data[date]);
-                }
-            }
-        }
-        else {
-            for (const el of response.data) {
-                for (const date of ['online', 'lastActive', 'createdAt']) {
-                    if (el[date]) {
-                        el[date] = new Date(el[date]);
-                    }
-                }
-            }
-        }
+        fixObjectDates(response)
         return response;
     },
     async (error) => {
@@ -50,7 +72,10 @@ axiosInstance.interceptors.response.use(
         ) {
             originalConfig._retry = true;
             try {
-                await refresh(refreshToken);
+                if (!refreshing) {
+                    refreshing = refresh(refreshToken);
+                }
+                await refreshing;
                 return axiosInstance(originalConfig);
             } catch (err: any) {
                 if (err.response && err.response.data) {
