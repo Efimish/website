@@ -4,6 +4,7 @@ for another project [`rust-webserver`](../../../rust-webserver).\
 It is not currently working, needs reworking.
 
 ### To-do list
+- [ ] Learn Front-end 😆
 - [x] Add functions and types to reach endpoints
 - [ ] Add pages to access everything you need
 - [ ] Add error handling (like username is too short etc...)
